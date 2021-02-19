@@ -21,7 +21,6 @@ export default function Login() {
               .signInWithPopup(provider)
               .then((result) => {
                 const user = result.user;
-                console.log(user.email);
               })
               .catch((error) => {
                 console.log(error.message);
