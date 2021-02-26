@@ -1,37 +1,34 @@
 import "../styles/global.css";
-import initFirebase from "../utils/initFirebase";
+
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import firebase from "firebase/app";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import store from "../redux/store";
-import { saveEmail } from "../features/user";
+import { saveAccount, resetAccount } from "../features/user";
 import { QueryClient, QueryClientProvider } from "react-query";
-
-initFirebase();
+import TabBar from "../components/TabBar";
+import { ReactQueryDevtools } from "react-query/devtools";
+import AuthWrapper from "../components/AuthWrapper";
 
 const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }) {
-  useEffect(() => {
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        if (user.email) {
-          store.dispatch(saveEmail(user.email));
-        }
-        Router.push("/home");
-      } else {
-        Router.push("/login");
-      }
-    });
-  }, [firebase]);
+  const router = useRouter();
+  const pathname = router.pathname;
+  // TODO: check if this page exists
+  const isInAuthPath = pathname !== "/" && pathname !== "/login";
 
   return (
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <Component {...pageProps} />
-      </QueryClientProvider>
+      <AuthWrapper>
+        <QueryClientProvider client={queryClient}>
+          <Component {...pageProps} />
+          {isInAuthPath && <TabBar />}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </AuthWrapper>
     </Provider>
   );
 }
